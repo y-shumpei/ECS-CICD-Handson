@@ -1,5 +1,7 @@
 # OIDCの設定
 
+GitHub側からAWSのリソースにアクセスするための権限の設定を行います。  
+
 ## IDプロバイダの作成
 
 ```bash
@@ -14,7 +16,7 @@ aws iam create-open-id-connect-provider \
 ### 環境変数の設定
 
 ```bash
-export GITHUB_REPOSITORY="Github-actions-handson/handson-test"
+export GITHUB_REPOSITORY=$(git remote get-url origin|sed -E 's|^.*[:/]([^/]+/[^/]+)\.git$|\1|')
 export PROVIDER_URL=token.actions.githubusercontent.com
 export AWS_ID=$(aws sts get-caller-identity --query Account --output text)
 export ROLE_NAME=github-actions
@@ -52,5 +54,8 @@ aws iam create-role \
   --assume-role-policy-document file://assume_role_policy.json
 ```
 
+## Secretの登録
+
 ## GitHubActionsの動作確認
 
+レポジトリを開いて上部のタブからActionsを選択
