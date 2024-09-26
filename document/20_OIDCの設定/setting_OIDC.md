@@ -54,7 +54,7 @@ aws iam create-role \
   --assume-role-policy-document file://assume_role_policy.json
 ```
 
-## Secretの登録
+## Secretの
 
 ## GitHubActionsの動作確認
 
