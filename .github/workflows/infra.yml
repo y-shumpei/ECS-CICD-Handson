@@ -1,0 +1,72 @@
+name: ECS構築
+
+on: workflow_dispatch
+
+env:
+  ROLE_ARN: arn:aws:iam::${{ secrets.AWS_ID }}:role/${{ secrets.ROLE_NAME }} 
+  SESSION_NAME: gh-oidc-${{ github.run_id }}-${{ github.run_attempt }}
+
+jobs:
+  vpc-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.ROLE_ARN }}
+          role-session-name: ${{ env.SESSION_NAME }}
+          aws-region: ap-northeast-1
+
+      - name: VPCスタックの作成
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: VPC-deploy
+          template: ./ECS-infra/10_VPC.yml
+
+  ecs-deploy:
+    needs: vpc-deploy
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.ROLE_ARN }}
+          role-session-name: ${{ env.SESSION_NAME }}
+          aws-region: ap-northeast-1
+
+      - name: ECSスタックの作成
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ECS-deploy
+          template: ./ECS-infra/20_ECS.yml
+          capabilities: "CAPABILITY_NAMED_IAM"
+
+  codedeploy-deploy:
+    needs: ecs-deploy
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.ROLE_ARN }}
+          role-session-name: ${{ env.SESSION_NAME }}
+          aws-region: ap-northeast-1
+
+      - name: CodeDeployスタックの作成
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: CodeDeploy-deploy
+          template: ./ECS-infra/30_CodeDeploy.yml
+          capabilities: "CAPABILITY_NAMED_IAM
