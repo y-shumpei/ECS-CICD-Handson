@@ -151,7 +151,7 @@ Resources:
       Cluster: !Ref HandsonECSCluster
       TaskDefinition: !Ref HandsonECSTaskDefinition
       LaunchType: FARGATE
-      DesiredCount: 0
+      DesiredCount: 2
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: ENABLED
