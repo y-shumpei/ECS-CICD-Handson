@@ -1,4 +1,4 @@
-name: ECS構築
+name: Infra deploy
 
 on: workflow_dispatch
 
@@ -69,4 +69,4 @@ jobs:
         with:
           name: CodeDeploy-deploy
           template: ./ECS-infra/30_CodeDeploy.yml
-          capabilities: "CAPABILITY_NAMED_IAM
+          capabilities: "CAPABILITY_NAMED_IAM"
