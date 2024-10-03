@@ -1,4 +1,4 @@
-name: ECS タスクデプロイ
+name: 3 ECS タスクデプロイ
 
 on: workflow_dispatch
 env:
@@ -23,7 +23,7 @@ jobs:
         with:
           ecr-repository-uri: ${{ secrets.ECR_REPOSITORY_URL }}
           dockerfile-path: docker/ecs/
-          
+
       - uses: ./.github/actions/container-deploy/      # コンテナのデプロイ
         with:
           ecs-cluster: ${{ secrets.ECS_CLUSTER_NAME }}

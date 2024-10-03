@@ -1,4 +1,4 @@
-name: ハンズオン環境のデプロイ
+name: 2 ハンズオン環境のデプロイ
 
 on: workflow_dispatch
 

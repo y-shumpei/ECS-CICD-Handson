@@ -1,5 +1,7 @@
 name: 1 OpenID Connectのテスト
-on: push
+
+on: workflow_dispatch
+
 env: # AWSの認証アクションへ指定する入力パラメータを環境変数として定義
   ROLE_ARN: arn:aws:iam::${{ secrets.AWS_ID }}:role/${{ secrets.ROLE_NAME }}
   SESSION_NAME: gh-oidc-${{ github.run_id }}-${{ github.run_attempt }}
