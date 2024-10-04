@@ -1,11 +1,21 @@
 # OIDCの設定
 
-GitHub側からAWSのリソースにアクセスするための権限の設定を行います。  
+ここでは、GitHub側からAWSのリソースにアクセスするための信頼関係の設定を行います。  
+静的クレデンシャルであるIAMユーザのアクセスキーを利用する方法もありますが、定期的にローテーションが行われなれば、漏洩した際の被害が大きくなりやすいです。
+そのため、GitHubとAWS感の信頼関係の確立には、一時クレデンシャルを活用することが推奨となります。
 
-## IDプロバイダの作成
+一時クレデンシャルの取得で利用されるのが**OIDC(OpenID Connect)**です。  
+OIDCでは、GitHub側で生成したトークンをAWS側で発行する一時クレデンシャルと交換します。
+ただ、このトークンをなんでもかんでも信頼してAWS側は一時クレデンシャルと交換しているわけではなく、予めこのトークンの発行元を信頼する設定をしておく必要があります。
 
-OpenID Connect Providrを作成し、AWSがGitHub OIDC Providerを信頼するように設定を行います。  
-下記コマンドを実行してください。
+トークンはGitHubが運用している**GitHub OIDC Provider**で生成されます。これをAWS側では、**OpenID Connect Provider**で信頼する設定を行うことができます。
+
+OIDCの設定を行い、実際にGitHub Actionsを使ってAWSのリソースへアクセスすることが目標となります。  
+
+## OpenID Connect Providerの作成
+
+初めにAWS側でOpenID Connect Providerを作成します。
+CloudShell等を開き、下記コマンドを実行してください。
 
 ```bash
 aws iam create-open-id-connect-provider \
@@ -13,6 +23,10 @@ aws iam create-open-id-connect-provider \
   --client-id-list sts.amazonaws.com \
   --thumbprint-list 1234567890123456789012345678901234567890
 ```
+
+`url`フラグでは、トークンを生成するシステム(Identity Provider)のURLを指定します。今回は、GitHub OIDC Providerを指定しています。  
+`client-id-list`フラグでは、トークンと一時クレデンシャルを交換するシステムを指定します。今回は、sts.amazonaws.comを指定しています。  
+`thumbprint-list`フラグでは、OIDCプロバイダーのSSL/TLS証明書のハッシュ値を指定します。GitHub OIDC Providerでは指定する必要がないので適当な値を指定しています。
 
 ## IAMロールの作成
 
@@ -52,6 +66,9 @@ cat <<EOF > assume_role_policy.json
 }
 EOF
 ```
+
+`Principal`にて先ほど作成したOpenID Connect Providerを、  
+`Condition`にて
 
 ### ロールの作成
 
