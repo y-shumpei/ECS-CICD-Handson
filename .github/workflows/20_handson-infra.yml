@@ -1,4 +1,4 @@
-name: ECS構築
+name: 2 ハンズオン環境のデプロイ
 
 on: workflow_dispatch
 
@@ -25,7 +25,7 @@ jobs:
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
           name: VPC-deploy
-          template: ./ECS-infra/10_VPC.yml
+          template: ./AWS/handson_infra/10_VPC.yml
 
   ecs-deploy:
     needs: vpc-deploy
@@ -46,7 +46,7 @@ jobs:
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
           name: ECS-deploy
-          template: ./ECS-infra/20_ECS.yml
+          template: ./AWS/handson_infra/20_ECS.yml
           capabilities: "CAPABILITY_NAMED_IAM"
 
   codedeploy-deploy:
@@ -68,5 +68,5 @@ jobs:
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
           name: CodeDeploy-deploy
-          template: ./ECS-infra/30_CodeDeploy.yml
-          capabilities: "CAPABILITY_NAMED_IAM
+          template: ./AWS/handson_infra/30_CodeDeploy.yml
+          capabilities: "CAPABILITY_NAMED_IAM"

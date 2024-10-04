@@ -1,8 +1,11 @@
-name: Deploy
+name: 3 ECS タスクデプロイ
+
 on: workflow_dispatch
+
 env:
   ROLE_ARN: arn:aws:iam::${{ secrets.AWS_ID }}:role/${{ secrets.ROLE_NAME }}
   SESSION_NAME: gh-oidc-${{ github.run_id }}-${{ github.run_attempt }}
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -11,20 +14,26 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4                      # チェックアウト
+      
       - uses: aws-actions/configure-aws-credentials@v4 # 一時クレデンシャルの取得
         with:
           role-to-assume: ${{ env.ROLE_ARN }}
           role-session-name: ${{ env.SESSION_NAME }}
           aws-region: ap-northeast-1
+
       - uses: ./.github/actions/container-build/       # コンテナイメージのビルド
         id: build
         with:
-          ecr-repository-uri: ${{ secrets.ECR_REPOSITORY_URL }}
+          ecr-repository-uri: ${{ vars.ECR_REPOSITORY_URL }}
           dockerfile-path: docker/ecs/
+
       - uses: ./.github/actions/container-deploy/      # コンテナのデプロイ
         with:
-          ecs-cluster: ${{ secrets.ECS_CLUSTER_NAME }}
-          ecs-service: ${{ secrets.ECS_SERVICE_NAME }}
-          task-definition: ${{ secrets.TASK_DEFINITION_NAME }}
-          container-name: ${{ secrets.CONTAINER_NAME }}
+          aws-id: ${{ secrets.AWS_ID }}
+          ecs-cluster: ${{ vars.ECS_CLUSTER_NAME }}
+          ecs-service: ${{ vars.ECS_SERVICE_NAME }}
+          task-definition: ${{ vars.TASK_DEFINITION_NAME }}
+          container-name: ${{ vars.CONTAINER_NAME }}
           container-image: ${{ steps.build.outputs.container-image }}
+          codedeploy-application: ${{ vars.CODEDEPLOY_APPLICATION }}
+          codedeploy-deployment-group: ${{ vars.CODEDEPLOY_DEPLOYMENT_GROUP }}

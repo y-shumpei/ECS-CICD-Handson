@@ -53,19 +53,5 @@ Resources:
                 - codedeploy.amazonaws.com
             Action:
               - sts:AssumeRole
-      Policies:
-        - PolicyName: handson-codedeploy-policy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - ecs:UpdateService
-                  - ecs:CreateDeployment
-                  - ecs:DescribeServices
-                  - ecs:DescribeTaskDefinition
-                  - ecs:DescribeTasks
-                  - ecs:RegisterTaskDefinition
-                  - ecs:StopTask
-                  - codedeploy:* # CodeDeployに必要なアクション
-                Resource: "*"
+      ManagedPolicyArns: 
+        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRoleForECS

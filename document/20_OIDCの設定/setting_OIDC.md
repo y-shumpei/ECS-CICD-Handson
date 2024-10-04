@@ -1,11 +1,21 @@
 # OIDCの設定
 
-GitHub側からAWSのリソースにアクセスするための権限の設定を行います。  
+ここでは、GitHub側からAWSのリソースにアクセスするための信頼関係の設定を行います。  
+静的クレデンシャルであるIAMユーザのアクセスキーを利用する方法もありますが、定期的にローテーションが行われなれば、漏洩した際の被害が大きくなりやすいです。
+そのため、GitHubとAWS感の信頼関係の確立には、一時クレデンシャルを活用することが推奨となります。
 
-## IDプロバイダの作成
+一時クレデンシャルの取得で利用されるのが**OIDC(OpenID Connect)**です。  
+OIDCでは、GitHub側で生成したトークンをAWS側で発行する一時クレデンシャルと交換します。
+ただ、このトークンをなんでもかんでも信頼してAWS側は一時クレデンシャルと交換しているわけではなく、予めこのトークンの発行元を信頼する設定をしておく必要があります。
 
-OpenID Connect Providrを作成し、AWSがGitHub OIDC Providerを信頼するように設定を行います。  
-下記コマンドを実行してください。
+トークンはGitHubが運用している**GitHub OIDC Provider**で生成されます。これをAWS側では、**OpenID Connect Provider**で信頼する設定を行うことができます。
+
+OIDCの設定を行い、実際にGitHub Actionsを使ってAWSのリソースへアクセスすることが目標となります。  
+
+## OpenID Connect Providerの作成
+
+初めにAWS側でOpenID Connect Providerを作成します。
+CloudShell等を開き、下記コマンドを実行してください。
 
 ```bash
 aws iam create-open-id-connect-provider \
@@ -14,9 +24,13 @@ aws iam create-open-id-connect-provider \
   --thumbprint-list 1234567890123456789012345678901234567890
 ```
 
+`url`フラグでは、トークンを生成するシステム(Identity Provider)のURLを指定します。今回は、GitHub OIDC Providerを指定しています。  
+`client-id-list`フラグでは、トークンと一時クレデンシャルを交換するシステムを指定します。今回は、sts.amazonaws.comを指定しています。  
+`thumbprint-list`フラグでは、OIDCプロバイダーのSSL/TLS証明書のハッシュ値を指定します。GitHub OIDC Providerでは指定する必要がないので適当な値を指定しています。
+
 ## IAMロールの作成
 
-GitHubがAWSリソースにアクセスする際に使用するロールを作成します。
+続いてGitHubがAWSリソースにアクセスする際に使用するロールを作成します。
 
 ### 変数の設定
 
@@ -53,6 +67,9 @@ cat <<EOF > assume_role_policy.json
 EOF
 ```
 
+`Principal`にて先ほど作成したOpenID Connect Providerを、  
+`Condition`にて
+
 ### ロールの作成
 
 `github-actions-role`という名前でロールを作成します。  
@@ -81,11 +98,12 @@ ROLE_ARN: arn:aws:iam::${{ secrets.AWS_ID }}:role/${{ secrets.ROLE_NAME }}
 ```
 
 `Secret`に保存した情報は`${{ secrets.変数名 }}`といった形式で参照することができます。
+
 ここでは、AWSのアカウントIDとロール名を`Secret`から参照しています。  
 
 この2つの情報を`Secret`に保存します。
 
-1. ブラウザ上でリポジトリを開き、上側のタブから`Setting`を画面が遷移したら左のタブから`Secrets and variables`→`Actions`を選択します。
+1. ブラウザ上でリポジトリを開き、上側のタブから`Setting`をクリックし画面が遷移したら左のタブから`Secrets and variables`→`Actions`を選択します。
 ![secret](./img/secret.png)
 
 2. 下記画面が開けたら、`New repository secret`を押下します。
@@ -97,6 +115,23 @@ ROLE_ARN: arn:aws:iam::${{ secrets.AWS_ID }}:role/${{ secrets.ROLE_NAME }}
 
 4. 同様に`AWS_ID`という名前でアカウントIDを保存してください。
 
-## GitHubActionsの動作確認
+## GitHub Actionsの動作確認
 
-レポジトリを開いて上部のタブからActionsを選択
+OIDCの設定は完了したので、実際にGitHub Actionsのワークフローを動作させてみます。
+
+1. ブラウザ上でリポジトリを開き、上側のタブから`Actions`をクリックし画面が遷移したら左のタブから`1 OpenID Connectのテスト`を選択します。
+![oidc_test_workflow](./img/oidc_test_workflow.png)
+2. 右側の`Run workflow`をクリックし緑色の`Run workflow`のボタンをクリックするとワークフローが始まります。'
+3. 少し待つとワークフローが表示されます。`1 OpenID Connectのテスト`をクリックしてみてください。
+![run_workflow](./img/run_workflow.png)
+4. 下記のような表示になるので`connect`をクリックしてみてください。
+![workflow_summary](./img/workflow_summary.png)
+5. `Run aws iam list-policies --scope Local`をクリックしてみると下記画像のようにポリシー一覧が出力されます。  
+ここで出力の中の`Arn`の項目を確認すると`arn:aws:iam:***:policy/`となっています。`***`の部分は本来アカウントIDが入りますが、アカウントIDは`Secret`に登録している情報となるのでログに出力されないようにマスクされています。
+![workflow_log](./img/workflow_log.png)
+
+## GitHub Actionsについて
+
+- [GitHub Actionsの概要](https://docs.github.com/ja/actions/about-github-actions/understanding-github-actions)
+- [ワークフローについて](https://docs.github.com/ja/actions/writing-workflows/about-workflows)
+- [ワークフロー構文](https://docs.github.com/ja/actions/writing-workflows/workflow-syntax-for-github-actions)

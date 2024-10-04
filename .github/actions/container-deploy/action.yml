@@ -1,6 +1,11 @@
 name: Container Deploy
+
 description: ECSサービスを更新し、コンテナをデプロイします。
+
 inputs:
+  aws-id:
+    required: true
+    description: AWSアカウントID
   ecs-cluster:
     required: true
     description: ECSクラスター
@@ -16,26 +21,51 @@ inputs:
   container-image:
     required: true
     description: コンテナイメージ
+  codedeploy-application:
+    required: true
+    description: CodeDeployアプリケーション
+  codedeploy-deployment-group:
+    required: true
+    description: CodeDeployデプロイグループ
+
 runs:
   using: composite
   steps:
-    - run: |                                                 # タスク定義の取得
+    - name: タスク定義の取得
+      run: |
         aws ecs describe-task-definition --task-definition "${TASK_DEFINITION}" \
         --query taskDefinition --output json > "${RUNNER_TEMP}/task-def.json"
       env:
         TASK_DEFINITION: ${{ inputs.task-definition }}
       shell: bash
-    - uses: aws-actions/amazon-ecs-render-task-definition@v1 # タスク定義の修正
+
+    - name: タスク定義の修正
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
       id: render
       with:
         task-definition: ${{ runner.temp }}/task-def.json
         container-name: ${{ inputs.container-name }}
         image: ${{ inputs.container-image }}
-    # - uses: aws-actions/amazon-ecs-deploy-task-definition@v1 # ECSサービスの更新
-    #   with:
-    #     cluster: ${{ inputs.ecs-cluster }}
-    #     service: ${{ inputs.ecs-service }}
-    #     task-definition: ${{ steps.render.outputs.task-definition }}
-    #     codedeploy-appspec: aws/appspec.yaml
-    #     codedeploy-application: github-actions-handson-test
-    #     codedeploy-deployment-group: github-actions-handson-test-group
+
+    - name: appspec.ymlの修正
+      run: | 
+        sed -i  -e "s/PLACEHOLDER_AWS_ID/${AWS_ID}/g" \
+                -e "s/PLACEHOLDER_TASK_DEFINITION/${TASK_DEFINITION}/g" \
+                -e "s/PLACEHOLDER_CONTAINER_NAME/${CONTAINER_NAME}/g" \
+                aws/ecs/appspec.yml
+        cat aws/ecs/appspec.yml
+      env:            
+        AWS_ID: ###### アカウントID ######
+        TASK_DEFINITION: ####### タスク定義 ######
+        CONTAINER_NAME: ###### コンテナ名 ######
+      shell: bash
+
+    - name: ECSサービスの更新
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1 
+      with:
+        cluster: ###### ECSクラスター ######
+        service: ###### ECSサービス ######
+        task-definition: ###### タスク定義 ######
+        codedeploy-appspec: aws/ecs/appspec.yml
+        codedeploy-application: ###### CodeDeployアプリケーション ######
+        codedeploy-deployment-group: ###### CodeDeployデプロイグループ ######
