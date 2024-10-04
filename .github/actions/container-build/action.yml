@@ -1,5 +1,7 @@
 name: Container Build
+
 description: コンテナイメージをビルドし、ECRへプッシュします。
+
 inputs:
   ecr-repository-uri:
     required: true
@@ -7,22 +9,34 @@ inputs:
   dockerfile-path:
     required: true
     description: Dockerfileのパス
+
 outputs:
   container-image:
     value: ${{ steps.meta.outputs.tags }}
     description: ビルドしたコンテナイメージ
+
 runs:
   using: composite
   steps:
-    - uses: aws-actions/amazon-ecr-login@v2 # Amazon ECRへのログイン
-    - uses: docker/metadata-action@v5       # コンテナイメージのメタデータ生成
+    - name: ECRにログイン
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: コンテナイメージのメタデータ生成
+      uses: docker/metadata-action@v5 
       id: meta
       with:
         images: ${{ inputs.ecr-repository-uri }}
         tags: type=sha,format=long
-    - uses: docker/build-push-action@v5     # コンテナイメージのビルドとプッシュ
-      with:
-        push: true
-        context: ${{ inputs.dockerfile-path }}
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+
+    - name: イメージのビルド
+      run: |
+        ###### dockerコマンドを使用してビルドしてください             ######
+        ###### Dockerfileは`docker/ecs/dockerfile`を使ってください  ######
+        ###### タグには${{ steps.meta.outputs.tags }}が使えます     ######
+      shell: bash
+
+    - name: ECRにイメージをプッシュ
+      if: success()
+      run: |
+        ###### dockerコマンドを使用してECRにプッシュしてください。 ######
+      shell: bash
