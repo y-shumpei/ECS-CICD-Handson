@@ -6,13 +6,13 @@ VS Codeなどでローカルで開発できる環境がある方はそちらを�
 ## 準備する環境
 
 - githubアカウント
-- gitとAWS CLIが利用できるIDE（VS Code、CLoud9など）
+- gitとAWS CLIが利用できるIDE（VS Code、CLoud9など）  
 以下コマンドで各バージョンが表示されるか確認してください
 ```
 git --version
 aws --version
 ```
-- AWS Profile
+- AWS Profile  
 以下コマンドで`Account`のidと`Arn`が利用するアカウントid、利用するIAMユーザーのarnになっていることを確認してください
 ```
 aws sts get-caller-identity
@@ -21,14 +21,14 @@ aws sts get-caller-identity
 ## 環境構築
 ### 1. Cloud9の作成
 
-1. VPCを作成します。
+1. VPCを作成します。  
 https://ap-northeast-1.console.aws.amazon.com/vpcconsole/home?region=ap-northeast-1#vpcs:
 - 作成するリソースで`VPCなど`を選択
 - 名前タグの自動生成に`ecs-cicd-handson`を入力
 - それ以外はデフォルトで作成
 ![vpc](./img/vpc.png)
 
-2. Cloud9を作成します。
+2. Cloud9を作成します。  
 https://ap-northeast-1.console.aws.amazon.com/cloud9control/home?region=ap-northeast-1#/
 - 名前に`ecs-cicd-handson-c9`を入力
 - インスタンスタイプで`t3.small`を選択
@@ -44,7 +44,7 @@ https://ap-northeast-1.console.aws.amazon.com/cloud9control/home?region=ap-north
 
 ### 2. リポジトリをforkして、開発環境にcloneする
 
-1. 以下リポジトリにアクセスして、右上の「**Fork**」を押します。
+1. 以下リポジトリにアクセスして、右上の「**Fork**」を押します。  
 https://github.com/CloudBuilders-Training/ECS-CICD-Handson
 
 ![fork_01](./img/fork_01.png)
@@ -69,7 +69,7 @@ git clone https://github.com/[自分のgithubアカウント名]/ECS-CICD-Handso
 
 terminalでAWS CLIを実行するAWS Profileの設定ができていない方は実施してください。
 
-1. 自分のAWSアカウントにログインし、アクセスキーを発行するIAMユーザーを選択します
+1. 自分のAWSアカウントにログインし、アクセスキーを発行するIAMユーザーを選択します  
 https://us-east-1.console.aws.amazon.com/iam/home?region=ap-northeast-1#/users
 
 2. 「**セキュリティ認証情報**」を選択し、「**アクセスキーを作成**」を押します。
@@ -82,7 +82,7 @@ https://us-east-1.console.aws.amazon.com/iam/home?region=ap-northeast-1#/users
 
 6. 開発環境のターミナルで以下コマンドを順次実行します。
 
-AWS CLIをインストールしていない場合は、以下ドキュメントを参考にインストールしてください。
+AWS CLIをインストールしていない場合は、以下ドキュメントを参考にインストールしてください。  
 https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/getting-started-install.html
 
 - AWS Profile設定
