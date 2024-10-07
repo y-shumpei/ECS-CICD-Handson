@@ -27,9 +27,25 @@ runを使ったコマンド実行ではなく、usesを使ったワークフロ�
 
 <details><summary>ヒント2</summary>
 
-公式のリポジトリを確認する
+公式のリポジトリを確認します。
 <https://github.com/aquasecurity/trivy-action>
 
+</details>
+
+<br>
+
+<details><summary>ヒント3</summary>
+
+実装するワークフローは以下です。
+```
+- name: Scan image with Trivy
+  uses: aquasecurity/trivy-action@master
+  with:
+    image-ref: ${{ inputs.ecr-repository-uri }}:${{ steps.tag.outputs.IMAGE_TAG }}
+    format: "table"
+    severity: "CRITICAL,HIGH"
+    exit-code: 1
+```
 </details>
 
 ## Dockleの実装
@@ -54,7 +70,7 @@ runを使ったコマンド実行ではなく、usesを使ったワークフロ�
 
 <details><summary>ヒント2</summary>
 
-公式のリポジトリを確認する
+公式のリポジトリを確認します。
 <https://github.com/goodwithtech/dockle-action>
 
 </details>
@@ -63,15 +79,30 @@ runを使ったコマンド実行ではなく、usesを使ったワークフロ�
 
 <details><summary>ヒント3</summary>
 
-Actions中に発生したエラーを確認して、Dockerfileを修正してください。
-
+実装するワークフローは以下です。
+```
+- name: Check Docker best practices with Dockle
+  uses: erzz/dockle-action@v1
+  with:
+    image: ${{ inputs.ecr-repository-uri }}:${{ steps.tag.outputs.IMAGE_TAG }}
+    failure-threshold: fatal
+    exit-code: 1
+```
 </details>
 
 <br>
 
 <details><summary>ヒント4</summary>
 
-エラー内容は以下です
+Actions中に発生したエラーを確認して、Dockerfileを修正してください。
+
+</details>
+
+<br>
+
+<details><summary>ヒント5</summary>
+
+エラー内容は以下です。
 ```
 * Use 'rm -rf /var/lib/apt/lists' after 'apt-get install|update' : RUN /bin/sh -c apt-get update && apt-get install -y     curl     gnupg     ca-certificates     lsb-release # buildkit
 * Use 'rm -rf /var/lib/apt/lists' after 'apt-get install|update' : RUN /bin/sh -c apt-get update && apt-get install -y nginx # buildkit
