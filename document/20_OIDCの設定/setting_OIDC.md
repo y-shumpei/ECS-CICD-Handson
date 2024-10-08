@@ -4,7 +4,7 @@
 静的クレデンシャルであるIAMユーザのアクセスキーを利用する方法もありますが、定期的にローテーションが行われなれば、漏洩した際の被害が大きくなりやすいです。
 そのため、GitHubとAWS感の信頼関係の確立には、一時クレデンシャルを活用することが推奨となります。
 
-一時クレデンシャルの取得で利用されるのが**OIDC(OpenID Connect)**です。  
+一時クレデンシャルの取得で利用されるのが**OIDC**(**OpenID Connect**)です。  
 OIDCでは、GitHub側で生成したトークンをAWS側で発行する一時クレデンシャルと交換します。
 ただ、このトークンをなんでもかんでも信頼してAWS側は一時クレデンシャルと交換しているわけではなく、予めこのトークンの発行元を信頼する設定をしておく必要があります。
 
@@ -81,6 +81,12 @@ aws iam create-role \
   --assume-role-policy-document file://assume_role_policy.json
 ```
 
+この後、GitHub ActionsのテストとしてIAMのロール一覧を出力する処理を実行するのでマネージドポリシーの `IAMReadOnlyAccess`をアタッチします。
+
+```bash
+aws iam attach-role-policy --role-name github-actions-role --policy-arn arn:aws:iam::aws:policy/IAMReadOnlyAccess
+```
+
 ロールの作成が完了したらAWS側での準備は終了です。
 
 ## Secretの登録
@@ -119,6 +125,7 @@ ROLE_ARN: arn:aws:iam::${{ secrets.AWS_ID }}:role/${{ secrets.ROLE_NAME }}
 ## GitHub Actionsの動作確認
 
 OIDCの設定は完了したので、実際にGitHub Actionsのワークフローを動作させてみます。
+確認のため動作としては、アカウント内のIAMポリシーの一覧を出力するのみとなります。
 
 1. ブラウザ上でリポジトリを開き、上側のタブから`Actions`をクリックし画面が遷移したら左のタブから`1 OpenID Connectのテスト`を選択します。
 ![oidc_test_workflow](./img/oidc_test_workflow.png)

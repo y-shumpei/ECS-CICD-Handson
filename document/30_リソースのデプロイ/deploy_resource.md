@@ -23,7 +23,7 @@ aws iam create-policy --policy-name cfn-deploy-policy --policy-document file://A
 続いて上記で作成したポリシーを`github-actions-role`にアタッチします。
 
 ```bash
-aws iam attach-role-policy --role-name github-action-role --policy-arn arn:aws:iam::${AWS_ID}:policy/cfn-deploy-policy
+aws iam attach-role-policy --role-name github-actions-role --policy-arn arn:aws:iam::${AWS_ID}:policy/cfn-deploy-policy
 ```
 
 ## GitHub Actionsを流す
