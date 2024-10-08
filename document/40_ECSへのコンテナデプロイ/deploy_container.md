@@ -18,6 +18,25 @@
 `actions`配下のファイルでは、コンテナのビルド・プッシュとタスクのデプロイの処理をそれぞれ分けて定義しています。
 [メタデータ構文](https://docs.github.com/ja/actions/sharing-automations/creating-actions/metadata-syntax-for-github-actions)といいます。
 
+はじめにワークフローを実行するためのポリシーをロールに付与します。
+
+## IAMポリシーの作成
+
+ポリシーは`AWS/iam_policy/deploy_ecs_task_policy.json`に用意しています。
+このファイルを使用してポリシーを作成します。
+
+```bash
+aws iam create-policy --policy-name deploy-ecs_task_policy --policy-document file://AWS/iam_policy/deploy_ecs_task_policy.json
+```
+
+## IAMロールへアタッチ
+
+続いて上記で作成したポリシーを`github-actions-role`にアタッチします。
+
+```bash
+aws iam attach-role-policy --role-name github-action-role --policy-arn arn:aws:iam::${AWS_ID}:policy/deploy_ecs_task_policy
+```
+
 ## 環境変数設定
 
 各ファイルを確認して、環境変数を設定してください。
