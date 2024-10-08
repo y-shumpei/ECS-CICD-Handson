@@ -23,7 +23,8 @@ Resources:
           Action: TERMINATE
           TerminationWaitTimeInMinutes: 5
         DeploymentReadyOption:
-          ActionOnTimeout: CONTINUE_DEPLOYMENT
+          ActionOnTimeout: STOP_DEPLOYMENT
+          WaitTimeInMinutes: 30
       LoadBalancerInfo:
         TargetGroupPairInfoList:
           - TargetGroups:
@@ -54,4 +55,4 @@ Resources:
             Action:
               - sts:AssumeRole
       ManagedPolicyArns: 
-        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRoleForECS
+        - arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS
