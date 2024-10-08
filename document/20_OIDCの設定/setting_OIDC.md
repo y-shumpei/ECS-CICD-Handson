@@ -67,8 +67,9 @@ cat <<EOF > assume_role_policy.json
 EOF
 ```
 
-`Principal`にて先ほど作成したOpenID Connect Providerを、  
-`Condition`にて
+`Principal`にて先ほど作成したOpenID Connect Providerを指定しています。  
+また、このままではGitHub OIDC ProvidcerへのOIDCトークンを取得することで誰でもアクセス可能になってしまうので  
+ `Condition`にてOIDCトークン内に含まれるリポジトリ名を条件のキーとして指定しています。
 
 ### ロールの作成
 
