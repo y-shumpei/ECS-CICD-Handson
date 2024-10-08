@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  # CodeDeployアプリケーション
+  HandsonCodeDeployApplication:
+    Type: AWS::CodeDeploy::Application
+    Properties:
+      ApplicationName: handson-codedeploy-application
+      ComputePlatform: ECS
+
+  # CodeDeployデプロイグループ
+  HandsonCodeDeployDeploymentGroup:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties:
+      ApplicationName: !Ref HandsonCodeDeployApplication
+      DeploymentGroupName: handson-deployment-group
+      ServiceRoleArn: !GetAtt HandsonCodeDeployServiceRole.Arn
+      DeploymentConfigName: CodeDeployDefault.ECSAllAtOnce
+      DeploymentStyle:
+        DeploymentType: BLUE_GREEN
+        DeploymentOption: WITH_TRAFFIC_CONTROL
+      BlueGreenDeploymentConfiguration:
+        TerminateBlueInstancesOnDeploymentSuccess:
+          Action: TERMINATE
+          TerminationWaitTimeInMinutes: 5
+        DeploymentReadyOption:
+          ActionOnTimeout: STOP_DEPLOYMENT
+          WaitTimeInMinutes: 30
+      LoadBalancerInfo:
+        TargetGroupPairInfoList:
+          - TargetGroups:
+              - Name: !ImportValue  ALBTargetGroupBlueName
+              - Name: !ImportValue  ALBTargetGroupGreenName
+            ProdTrafficRoute:
+              ListenerArns:
+                - !ImportValue  ALBListenerProdTrafficID
+            TestTrafficRoute:
+              ListenerArns:
+                - !ImportValue  ALBListenerTestTrafficID
+      ECSServices:
+        - ClusterName: !ImportValue HandsonECSClusterID
+          ServiceName: !ImportValue HandsonECSServiceName
+
+  # IAMロール: CodeDeployサービスロール
+  HandsonCodeDeployServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: handson-codedeploy-service-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - codedeploy.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns: 
+        - arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS

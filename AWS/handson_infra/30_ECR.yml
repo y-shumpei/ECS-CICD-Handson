@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  # ECRリポジトリ
+  HandsonECRRepository:
+    Type: AWS::ECR::Repository
+    Properties:
+      RepositoryName: handson-ecr-repository
+
+Outputs:
+  ECRRepositoryName:
+    Description: "ECR Repository Name"
+    Value: !Ref HandsonECRRepository
+    Export:
+      Name: HandsonECRRepositoryName

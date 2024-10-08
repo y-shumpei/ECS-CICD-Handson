@@ -1,0 +1,96 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  # ECSクラスター
+  HandsonECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: handson-ecs-cluster
+
+  # ECSタスク定義
+  HandsonECSTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: handson-ecs-task
+      Cpu: '256'
+      Memory: '512'
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      ExecutionRoleArn: !GetAtt HandsonTaskExecutionRole.Arn
+      ContainerDefinitions:
+        - Name: handson-container
+          Image: !Sub
+            - "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${RepositoryName}:initial"
+            - RepositoryName: !ImportValue HandsonECRRepositoryName
+          Essential: true
+          PortMappings:
+            - ContainerPort: 80
+              Protocol: tcp
+
+  # ECSサービス
+  HandsonECSService:
+    Type: AWS::ECS::Service
+    Properties:
+      ServiceName: handson-ecs-service
+      Cluster: !Ref HandsonECSCluster
+      TaskDefinition: !Ref HandsonECSTaskDefinition
+      LaunchType: FARGATE
+      DesiredCount: 2
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: ENABLED
+          Subnets:
+            - !ImportValue HandsonPublicSubnet1Id
+            - !ImportValue HandsonPublicSubnet2Id
+          SecurityGroups:
+            - !ImportValue HandsonECSSecurityGroupID
+      DeploymentController:
+        Type: CODE_DEPLOY
+      LoadBalancers:
+        - ContainerName: handson-container
+          ContainerPort: 80
+          TargetGroupArn: !ImportValue  ALBTargetGroupBlueID
+
+  # IAMロール: ECSタスク実行ロール
+  HandsonTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: handson-task-execution-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs-tasks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: handson-task-execution-policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - ecr:GetAuthorizationToken
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+
+#別スタック参照用にアウトプット出力
+Outputs:
+
+
+  ECSClusterID:
+    Description: "ECS Cluster ID"
+    Value: !Ref HandsonECSCluster
+    Export:
+      Name: HandsonECSClusterID
+
+  ECSServiceName:
+    Description: "ECS Service Name"
+    Value: !GetAtt HandsonECSService.Name
+    Export:
+      Name: HandsonECSServiceName

@@ -1,0 +1,150 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  # セキュリティグループ
+  HandsonECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: handson-ecs-security-group
+      GroupDescription: Allow HTTP access to ECS containers
+      VpcId: !ImportValue HandsonVpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          FromPort: 0
+          ToPort: 0
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: handson-ecs-security-group
+  
+  # ターゲットグループ ブルー
+  ALBTargetGroupBlue:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties:
+      HealthCheckIntervalSeconds: 5
+      HealthCheckPath: /
+      HealthCheckPort: '80'
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: '200'
+      Port: 80
+      Protocol: HTTP
+      Tags:
+        - Key: Group
+          Value: Example
+      TargetType: ip
+      UnhealthyThresholdCount: 4
+      VpcId: !ImportValue HandsonVpcId
+
+  # ターゲットグループグリーン
+  ALBTargetGroupGreen:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties:
+      HealthCheckIntervalSeconds: 5
+      HealthCheckPath: /
+      HealthCheckPort: '80'
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: '200'
+      Port: 80
+      Protocol: HTTP
+      Tags:
+        - Key: Group
+          Value: Example
+      TargetType: ip
+      UnhealthyThresholdCount: 4
+      VpcId: !ImportValue HandsonVpcId
+
+  # ロードバランサー
+  ExampleALB:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Properties:
+      Scheme: internet-facing
+      SecurityGroups:
+        - !Ref HandsonECSSecurityGroup
+      Subnets:
+        - !ImportValue HandsonPublicSubnet1Id
+        - !ImportValue HandsonPublicSubnet2Id
+      Tags:
+        - Key: Group
+          Value: Example
+      Type: application
+      IpAddressType: ipv4
+
+  # ALB本番リスナー
+  ALBListenerProdTraffic:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      DefaultActions:
+        - Type: forward
+          ForwardConfig:
+            TargetGroups:
+              - TargetGroupArn: !Ref ALBTargetGroupBlue
+                Weight: 1
+      LoadBalancerArn: !Ref ExampleALB
+      Port: 80
+      Protocol: HTTP
+
+  # ALBテストリスナー
+  ALBListenerTestTraffic:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      DefaultActions:
+        - Type: forward
+          ForwardConfig:
+            TargetGroups:
+              - TargetGroupArn: !Ref ALBTargetGroupGreen
+                Weight: 1
+      LoadBalancerArn: !Ref ExampleALB
+      Port: 8080
+      Protocol: HTTP
+
+#別スタック参照用にアウトプット出力
+Outputs:
+  HandsonECSSecurityGroupID:
+    Description: "Handson ECS Security Group ID"
+    Value: !Ref HandsonECSSecurityGroup
+    Export:
+      Name: HandsonECSSecurityGroupID
+
+  ALBTargetGroupBlueID:
+    Description: "ALB Target Group Blue ID"
+    Value: !Ref ALBTargetGroupBlue
+    Export:
+      Name: ALBTargetGroupBlueID
+
+  ALBTargetGroupBlueName:
+    Description: "Name of ALB Target Group Blue"
+    Value: !GetAtt ALBTargetGroupBlue.TargetGroupName
+    Export:
+      Name: ALBTargetGroupBlueName
+
+  ALBTargetGroupGreenName:
+    Description: "Name of ALB Target Group Green"
+    Value: !GetAtt ALBTargetGroupGreen.TargetGroupName
+    Export:
+      Name: ALBTargetGroupGreenName
+
+  ALBListenerProdTrafficID:
+    Description: "ALB Listener ProdTraffic ID"
+    Value: !Ref ALBListenerProdTraffic
+    Export:
+      Name: ALBListenerProdTrafficID
+
+  ALBListenerTestTrafficID:
+    Description: "ALB Listener TestTraffic ID"
+    Value: !Ref ALBListenerTestTraffic
+    Export:
+      Name: ALBListenerTestTrafficID
