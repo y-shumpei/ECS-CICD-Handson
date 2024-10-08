@@ -24,7 +24,7 @@ jobs:
       - uses: ./.github/actions/container-build/       # コンテナイメージのビルド
         id: build
         with:
-          ecr-repository-uri: ${{ vars.ECR_REPOSITORY_URL }}
+          ecr-repository-uri: ${{ secrets.ECR_REPOSITORY_URL }}
           dockerfile-path: docker/ecs/
 
       - uses: ./.github/actions/container-deploy/      # コンテナのデプロイ
