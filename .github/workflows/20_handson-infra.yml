@@ -27,8 +27,81 @@ jobs:
           name: VPC-deploy
           template: ./AWS/handson_infra/10_VPC.yml
 
-  ecs-deploy:
+  alb-deploy:
     needs: vpc-deploy
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.ROLE_ARN }}
+          role-session-name: ${{ env.SESSION_NAME }}
+          aws-region: ap-northeast-1
+
+      - name: ALBスタックの作成
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ALB-deploy
+          template: ./AWS/handson_infra/20_ALB.yml
+
+  ecr-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.ROLE_ARN }}
+          role-session-name: ${{ env.SESSION_NAME }}
+          aws-region: ap-northeast-1
+
+      - name: ECRスタックの作成
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ECR-deploy
+          template: ./AWS/handson_infra/30_ECR.yml
+
+  ecr-image-push:
+    needs: ecr-deploy
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: read
+      id-token: write
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.ROLE_ARN }}
+          role-session-name: ${{ env.SESSION_NAME }}
+          aws-region: ap-northeast-1
+
+      - run: |
+          ECR_REPOSITORY_NAME=$(aws cloudformation describe-stacks --stack-name ECR-deploy --query "Stacks[0].Outputs[?OutputKey=='ECRRepositoryName'].OutputValue" --output text)
+          echo "ECR_REPOSITORY_NAME=$ECR_REPOSITORY_NAME" >> $GITHUB_ENV
+      
+      - uses: aws-actions/amazon-ecr-login@v2
+
+      - run: |
+          docker pull nginx:latest
+
+      - run: |
+          REPOSITORY_URI=${{ secrets.AWS_ID }}.dkr.ecr.ap-northeast-1.amazonaws.com/${{ env.ECR_REPOSITORY_NAME }}
+          echo "REPOSITORY_URI=$REPOSITORY_URI" >> $GITHUB_ENV
+          docker tag nginx:latest $REPOSITORY_URI:initial
+      
+      - run: |
+          docker push ${{ env.REPOSITORY_URI }}:initial
+
+  ecs-deploy:
+    needs: 
+      - alb-deploy
+      - ecr-image-push
     runs-on: ubuntu-latest
     permissions: 
       contents: read
@@ -46,7 +119,7 @@ jobs:
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
           name: ECS-deploy
-          template: ./AWS/handson_infra/20_ECS.yml
+          template: ./AWS/handson_infra/40_ECS.yml
           capabilities: "CAPABILITY_NAMED_IAM"
 
   codedeploy-deploy:
@@ -68,5 +141,5 @@ jobs:
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
           name: CodeDeploy-deploy
-          template: ./AWS/handson_infra/30_CodeDeploy.yml
+          template: ./AWS/handson_infra/50_CodeDeploy.yml
           capabilities: "CAPABILITY_NAMED_IAM"

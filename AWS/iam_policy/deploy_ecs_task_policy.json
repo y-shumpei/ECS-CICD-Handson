@@ -12,6 +12,8 @@
                 "ecr:InitiateLayerUpload",
                 "ecr:PutImage",
                 "ecr:UploadLayerPart",
+                "ecr:ListImages",
+                "ecr:BatchDeleteImage",
                 "ecs:DescribeTaskDefinition",
                 "ecs:RegisterTaskDefinition",
                 "ecs:UpdateService",
