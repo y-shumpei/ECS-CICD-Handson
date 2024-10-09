@@ -26,14 +26,14 @@ jobs:
           aws cloudformation delete-stack --stack-name CodeDeploy-deploy
       - name: CodeDeployスタックの削除完了待機
         run: |
-          aws cloudformation wait stack-deploy-complete --stack-name CodeDeploy-deploy
+          aws cloudformation wait stack-delete-complete --stack-name CodeDeploy-deploy
 
       - name: ECSスタックの削除
         run: |
           aws cloudformation delete-stack --stack-name ECS-deploy
       - name: ECSスタックの削除完了待機
         run: |
-          aws cloudformation wait stack-deploy-complete --stack-name ECS-deploy
+          aws cloudformation wait stack-delete-complete --stack-name ECS-deploy
 
       - name: ECRイメージ削除
         run: |
@@ -45,18 +45,18 @@ jobs:
           aws cloudformation delete-stack --stack-name ECR-deploy
       - name: ECRスタックの削除完了待機
         run: |
-          aws cloudformation wait stack-deploy-complete --stack-name ECR-deploy
+          aws cloudformation wait stack-delete-complete --stack-name ECR-deploy
 
       - name: ALBスタックの削除
         run: |
           aws cloudformation delete-stack --stack-name ALB-deploy
       - name: ALBスタックの削除完了待機
         run: |
-          aws cloudformation wait stack-deploy-complete --stack-name ALB-deploy
+          aws cloudformation wait stack-delete-complete --stack-name ALB-deploy
 
       - name: VPCスタックの削除
         run: |
           aws cloudformation delete-stack --stack-name VPC-deploy
       - name: VPCスタックの削除完了待機
         run: |
-          aws cloudformation wait stack-deploy-complete --stack-name VPC-deploy
+          aws cloudformation wait stack-delete-complete --stack-name VPC-deploy
