@@ -1,6 +1,10 @@
 name: 3 ECS タスクデプロイ
 
-on: workflow_dispatch
+on:
+  push:
+    branched:
+      - main
+    workflow_dispatch:
 
 env:
   ROLE_ARN: arn:aws:iam::${{ secrets.AWS_ID }}:role/${{ secrets.ROLE_NAME }}
@@ -14,7 +18,7 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4                      # チェックアウト
-      
+
       - uses: aws-actions/configure-aws-credentials@v4 # 一時クレデンシャルの取得
         with:
           role-to-assume: ${{ env.ROLE_ARN }}
@@ -25,7 +29,7 @@ jobs:
         id: build
         with:
           ecr-repository-uri: ${{ secrets.ECR_REPOSITORY_URL }}
-          dockerfile-path: docker/ecs/
+          dockerfile-path: docker/ecs/Dockerfile
 
       - uses: ./.github/actions/container-deploy/      # コンテナのデプロイ
         with:

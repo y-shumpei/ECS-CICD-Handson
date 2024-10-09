@@ -9,12 +9,12 @@ env:
 jobs:
   delete-stacks:
     runs-on: ubuntu-latest
-    permissions: 
+    permissions:
       contents: read
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.ROLE_ARN }}

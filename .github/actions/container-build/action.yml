@@ -22,7 +22,7 @@ runs:
       uses: aws-actions/amazon-ecr-login@v2
 
     - name: コンテナイメージのメタデータ生成
-      uses: docker/metadata-action@v5 
+      uses: docker/metadata-action@v5
       id: meta
       with:
         images: ${{ inputs.ecr-repository-uri }}
@@ -30,13 +30,13 @@ runs:
 
     - name: イメージのビルド
       run: |
-        ###### dockerコマンドを使用してビルドしてください             ######
-        ###### Dockerfileは`docker/ecs/dockerfile`を使ってください  ######
-        ###### タグには${{ steps.meta.outputs.tags }}が使えます     ######
+        ###### dockerコマンドを使用してビルドしてください  ヒント1参照      ######
+        ###### Dockerfileは${{ inputs.dockerfile-path }}を使ってください  ######
+        ###### タグには${{ steps.meta.outputs.tags }}が使えます           ######
       shell: bash
 
     - name: ECRにイメージをプッシュ
       if: success()
       run: |
-        ###### dockerコマンドを使用してECRにプッシュしてください。 ######
+        ###### dockerコマンドを使用してECRにプッシュしてください。  ヒント2参照 ######
       shell: bash
