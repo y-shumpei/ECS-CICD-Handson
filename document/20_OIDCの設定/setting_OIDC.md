@@ -128,6 +128,8 @@ OIDCの設定は完了したので、実際にGitHub Actionsのワークフロ�
 確認のため動作としては、アカウント内のIAMポリシーの一覧を出力するのみとなります。
 
 1. ブラウザ上でリポジトリを開き、上側のタブから`Actions`をクリックし画面が遷移したら左のタブから`1 OpenID Connectのテスト`を選択します。
+※`Actinos`を初めて開く際に、workflowsの実行を許可するか聞かれるので許可してください。
+![workflow_enable](./img/workflow_enable.png)
 ![oidc_test_workflow](./img/oidc_test_workflow.png)
 2. 右側の`Run workflow`をクリックし緑色の`Run workflow`のボタンをクリックするとワークフローが始まります。'
 3. 少し待つとワークフローが表示されます。`1 OpenID Connectのテスト`をクリックしてみてください。
