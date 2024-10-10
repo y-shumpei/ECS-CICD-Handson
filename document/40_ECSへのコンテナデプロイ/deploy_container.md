@@ -84,13 +84,13 @@ with:
 OIDCの設定の際に登録したように、ワークフロー内で参照するための変数の設定を行ってください。  
 対象となる変数名は下記になります。
 
-- `ECR_REPOSITORY`
-- `ECS_CLUSTER`
-- `ECS_SERVICE`
-- `TASK_DEFINIION`
-- `CONTAINER_NAME`
-- `CODEDEPLOY_APPLICATION`
-- `CODEDEPLOY_DEPLOYMENT_GROUP`
+- `ECR_REPOSITORY`：ECRのリポジトリ名のみの値になります。
+- `ECS_CLUSTER`：ECSクラスターの名前になります。
+- `ECS_SERVICE`：ECSサービスの名前になります。上記のECSクラスター内にて確認できます。
+- `TASK_DEFINIION`：タスク定義の名前になります。ECSのマネジメントコンソール上にて確認できます。
+- `CONTAINER_NAME`：上記のタスク定義内にあるコンテナ名になります。
+- `CODEDEPLOY_APPLICATION`：CodeDeployのアプリケーションの名前になります。
+- `CODEDEPLOY_DEPLOYMENT_GROUP`：上記アプリケーション内にあるデプロイグループの名前になります。
 
 ### GitHubActionsのワークフローファイルの編集
 
