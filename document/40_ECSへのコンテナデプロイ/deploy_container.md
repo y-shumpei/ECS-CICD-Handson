@@ -82,7 +82,7 @@ with:
 `${{ secrets.ECR_REPOSITORY_URL }}` という記載では`Secret`に`ECR_REPOSITORY_URL`という名前で登録された値を参照しています。
 
 OIDCの設定の際に登録したように、ワークフロー内で参照するための変数の設定を行ってください。  
-対象となる変数名は下記になります。
+対象となる変数名は下記になります。中には`Secrets`ではなく`Variables`として登録するものもあるので注意してください。  
 
 - `ECR_REPOSITORY`：ECRのリポジトリ名のみの値になります。
 - `ECS_CLUSTER`：ECSクラスターの名前になります。
