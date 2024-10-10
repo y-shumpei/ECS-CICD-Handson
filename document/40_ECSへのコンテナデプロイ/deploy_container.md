@@ -2,7 +2,31 @@
 
 デプロイしたECSにコンテナをデプロイを行うためのGitHub Actionsのワークフローを作成することが目標となります。
 
-今回使用するファイルは、下記になります。
+はじめにワークフローを実行するためのポリシーをロールに付与します。
+
+## IAMポリシーの作成
+
+ポリシーは`AWS/iam_policy/deploy_ecs_task_policy.json`に用意しています。
+このファイルを使用してポリシーを作成します。
+
+```bash
+aws iam create-policy --policy-name deploy-ecs_task_policy --policy-document file://AWS/iam_policy/deploy_ecs_task_policy.json
+```
+
+## IAMロールへアタッチ
+
+続いて上記で作成したポリシーを`github-actions-role`にアタッチします。
+
+```bash
+aws iam attach-role-policy --role-name github-action-role --policy-arn arn:aws:iam::${AWS_ID}:policy/deploy_ecs_task_policy
+```
+
+## ワークフローファイルの作成
+
+ここから皆さんに色々調べてもらいながらファイルを作成します。
+
+予め、ワークフローのファイルは用意しており今回はその中のファイルを編集してワークフローを完成させていただきます。  
+今回使用するファイルは、下記の3ファイルになります。各ファイルを開いてみてください。  
 
 ```text
 .github
@@ -15,58 +39,76 @@
     └── 30_ecs-task-deploy.yml
 ```
 
-`actions`配下のファイルでは、コンテナのビルド・プッシュとタスクのデプロイの処理をそれぞれ分けて定義しています。
-[メタデータ構文](https://docs.github.com/ja/actions/sharing-automations/creating-actions/metadata-syntax-for-github-actions)といいます。
+まず、`.github/workflows/30_ecs-task-deploy.yml`についてです。こちらのファイルは`.github/workflow`配下のファイルとなるので、ワークフローはこちらから実行されます。そのため、ワークフローの全体の流れを定義しているファイルとなります。  
 
-はじめにワークフローを実行するためのポリシーをロールに付与します。
+ここで着目していただきたい記載が24行目と30行目になります。
 
-## IAMポリシーの作成
+【24行目】
 
-ポリシーは`AWS/iam_policy/deploy_ecs_task_policy.json`に用意しています。
-このファイルを使用してポリシーを作成します。
-
-```bash
-aws iam create-policy --policy-name deploy-ecs-task-policy --policy-document file://AWS/iam_policy/deploy_ecs_task_policy.json
+```yaml
+- uses: ./.github/actions/container-build/
 ```
 
-## IAMロールへアタッチ
+【30行目】
 
-続いて上記で作成したポリシーを`github-actions-role`にアタッチします。
-
-```bash
-aws iam attach-role-policy --role-name github-actions-role --policy-arn arn:aws:iam::${AWS_ID}:policy/deploy-ecs-task-policy
+```yaml
+- uses: ./.github/actions/container-deploy/
 ```
 
-## 環境変数設定
+それぞれ、カレントディレクトリから今回扱う残りの2ファイルへのパスとなっています。  
+これらは残りの2ファイルで定義されたタスクを呼び出しています。
 
-GitHub上で、以下環境変数を設定してください。  
-各値はコンソールから確認してください。
+24行目にて呼び出している`.github/workflows/container-build/action.yml`では、コンテナのビルドを行い、ECRにプッシュします。
 
-- `Secrets`に登録
-  - `ECR_REPOSITORY_URL` - ECRリポジトリURL
-- `Variables`に登録
-  - `ECR_REPOSITORY` - ECRリポジトリ名
-  - `ECS_CLUSTER_NAME` - ECSクラスター名
-  - `ECS_SERVICE_NAME` - ECRサービス名
-  - `TASK_DEFINITION_NAME` - タスク定義名
-  - `CONTAINER_NAME` - コンテナ名
-  - `CODEDEPLOY_APPLICATION` - CodeDeployアプリケーション名
-  - `CODEDEPLOY_DEPLOYMENT_GROUP` - CodeDeployデプロイメントグループ名
+30行目にて呼び出している`.github/workflows/contianer-deploy/action.yml`では、ECRのリポジトリからECSのタスク定義を更新し、ECSクラスターのサービスを更新しています。
 
-## GitHubActionsのワークフローファイルの編集
+ファイルの説明としては、以上となります。  
+ここからは実際に先ほどデプロイしたリソースから必要な変数を設定したり、ワークフローファイルを編集していただきます。
+
+### リポジトリ変数設定
+
+`.github/workflows/30_ecs-task-deploy.yml`のステップ内の各タスクにて`with`という要素があります。  
+こちらでは、タスクに対して変数を与えることができます。
+
+例えば、下記のような記載があります。
+
+【26~27行目】
+
+```yaml
+with:
+  ecr-repository-uri: ${{ secrets.ECR_REPOSITORY_URL }}
+```
+
+`${{ secrets.ECR_REPOSITORY_URL }}` という記載では`Secret`に`ECR_REPOSITORY_URL`という名前で登録された値を参照しています。
+
+OIDCの設定の際に登録したように、ワークフロー内で参照するための変数の設定を行ってください。  
+対象となる変数名は下記になります。中には`Secrets`ではなく`Variables`として登録するものもあるので注意してください。  
+
+- `ECR_REPOSITORY`：ECRのリポジトリ名のみの値になります。
+- `ECS_CLUSTER`：ECSクラスターの名前になります。
+- `ECS_SERVICE`：ECSサービスの名前になります。上記のECSクラスター内にて確認できます。
+- `TASK_DEFINIION`：タスク定義の名前になります。ECSのマネジメントコンソール上にて確認できます。
+- `CONTAINER_NAME`：上記のタスク定義内にあるコンテナ名になります。
+- `CODEDEPLOY_APPLICATION`：CodeDeployのアプリケーションの名前になります。
+- `CODEDEPLOY_DEPLOYMENT_GROUP`：上記アプリケーション内にあるデプロイグループの名前になります。
+
+### GitHubActionsのワークフローファイルの編集
 
 以下ファイルの`###### ... ######`の項目に正しい処理を記載してください。  
-- .github/actions/container-build/action.yml
-- .github/actions/container-deploy/action.yml
-- .github/workflows/30_ecs-task-deploy.yml
+
+- `.github/actions/container-build/action.yml`
+- `.github/actions/container-deploy/action.yml`
+
 ファイルの修正が完了したら、以下コマンドを順次実行して、リポジトリにpushしてください。  
 コミットメッセージにはコードの修正内容がわかるようなメッセージを記載してください。  
-```
+
+```bash
 git add .
 git commit -m "コミットメッセージ"
 git push -u origin main
 ```
-pushをトリガーに`ECS タスクデプロイ`のworkflowが起動します。  
+
+pushをトリガーに`3 ECS タスクデプロイ`のworkflowが起動します。  
 失敗したら内容を確認し、修正して再度pushしてください。
 
 <details><summary>ヒント1</summary>
@@ -116,7 +158,7 @@ docker push <タグ>
 5. ALBの80ポートにアクセスして置き換えが完了していることを確認します。  
 **Hello Amazon ECS**が画面に表示されていれば成功です。
 
-## リンク
+### 参考リンク
 
 - ビルド
   - [docker/metadata-action](https://github.com/docker/metadata-action)
@@ -124,3 +166,12 @@ docker push <タグ>
   - [docker push](https://docs.docker.jp/engine/reference/commandline/push.html)
 - デプロイ
   - [amazon-ecs-deploy-task-definition](https://github.com/aws-actions/amazon-ecs-deploy-task-definition)
+
+## 手順一覧
+
+1. [開発環境の準備](./document/10_開発環境の準備/environment_preparation.md)
+2. [OIDCの設定](./document/20_OIDCの設定/setting_OIDC.md)
+3. [リソースのデプロイ](./document/30_リソースのデプロイ/deploy_resource.md)
+4. [ECSへのコンテナデプロイ](./document/40_ECSへのコンテナデプロイ/deploy_container.md)
+5. [セキュリティの実装](./document/50_セキュリティの実装/security_scan.md)←次の手順です
+6. [リソースの削除](./document/60_リソースの削除/delete_resource.md)
