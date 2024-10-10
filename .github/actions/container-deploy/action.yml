@@ -48,24 +48,24 @@ runs:
         image: ${{ inputs.container-image }}
 
     - name: appspec.ymlの修正
-      run: | 
+      run: |
         sed -i  -e "s/PLACEHOLDER_AWS_ID/${AWS_ID}/g" \
                 -e "s/PLACEHOLDER_TASK_DEFINITION/${TASK_DEFINITION}/g" \
                 -e "s/PLACEHOLDER_CONTAINER_NAME/${CONTAINER_NAME}/g" \
-                aws/ecs/appspec.yml
-        cat aws/ecs/appspec.yml
-      env:            
+                AWS/ecs/appspec.yml
+        cat AWS/ecs/appspec.yml
+      env:
         AWS_ID: ###### アカウントID ######
         TASK_DEFINITION: ####### タスク定義 ######
         CONTAINER_NAME: ###### コンテナ名 ######
       shell: bash
 
     - name: ECSサービスの更新
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1 
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        cluster: ###### ECSクラスター ######
-        service: ###### ECSサービス ######
-        task-definition: ###### タスク定義 ######
-        codedeploy-appspec: aws/ecs/appspec.yml
+        ecs-cluster: ###### ECSクラスター ######
+        ecs-service: ###### ECSサービス ######
+        task-definition: ###### タスク定義 ※こちらは「タスク定義の修正」時に出力されたタスク定義を記述します。ヒント3参照 ######
+        codedeploy-appspec: AWS/ecs/appspec.yml
         codedeploy-application: ###### CodeDeployアプリケーション ######
         codedeploy-deployment-group: ###### CodeDeployデプロイグループ ######

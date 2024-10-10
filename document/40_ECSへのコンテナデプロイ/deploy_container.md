@@ -94,7 +94,69 @@ OIDCの設定の際に登録したように、ワークフロー内で参照す�
 
 ### GitHubActionsのワークフローファイルの編集
 
-各ファイルの`###### ... ######`の項目に正しい処理を記載してください。  
+以下ファイルの`###### ... ######`の項目に正しい処理を記載してください。  
+
+- `.github/actions/container-build/action.yml`
+- `.github/actions/container-deploy/action.yml`
+
+ファイルの修正が完了したら、以下コマンドを順次実行して、リポジトリにpushしてください。  
+コミットメッセージにはコードの修正内容がわかるようなメッセージを記載してください。  
+
+```bash
+git add .
+git commit -m "コミットメッセージ"
+git push -u origin main
+```
+
+pushをトリガーに`3 ECS タスクデプロイ`のworkflowが起動します。  
+失敗したら内容を確認し、修正して再度pushしてください。
+
+<details><summary>ヒント1</summary>
+
+dockerのビルドコマンドは以下です。  
+<dockerファイルのパス>と<タグ>をそれぞれ書き換えてください。
+```
+docker build -f <dockerファイルのパス> -t <タグ> .
+```
+
+</details>
+
+<br>
+
+<details><summary>ヒント2</summary>
+
+dockerのプッシュコマンドは以下です。
+<タグ>を書き換えてください。
+```
+docker push <タグ>
+```
+
+</details>
+
+<br>
+
+<details><summary>ヒント3</summary>
+
+`.github/workflows/30_ecs-task-deploy.yml`の`container-image`のように、以前の処理で出力した内容を利用することができます。
+
+</details>
+
+## CodeDeployを実行してタスクを入れ替える
+
+1. GitHub Actionsが正常に終了すると、CodeDeployが実行されるので、`CodeDeploy` -> `デプロイメント` -> `進行中のデプロイ`を押して確認します。  
+![code_deploy_01](./img/code_deploy_01.png)
+
+2. ステップ3まで進むと、置き換えタスクセットが作成されるので、ALBの8080ポートにアクセスして、正常に閲覧できるかを確認します。  
+**Hello Amazon ECS**が画面に表示されていれば成功です。
+
+3. 右上の`トラフィックを再ルーティング`を押して、タスクセットの切り替えを実施します。
+![code_deploy_02](./img/code_deploy_02.png)
+
+4. ステップ5まで進んだら`元のタスクセットの終了`を押します。
+![code_deploy_03](./img/code_deploy_03.png)
+
+5. ALBの80ポートにアクセスして置き換えが完了していることを確認します。  
+**Hello Amazon ECS**が画面に表示されていれば成功です。
 
 ### 参考リンク
 

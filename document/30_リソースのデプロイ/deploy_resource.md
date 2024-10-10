@@ -34,4 +34,5 @@ aws iam attach-role-policy --role-name github-actions-role --policy-arn arn:aws:
 先ほどと同じように、ワークフローを選択し`Run workflow`からワークフローを実行してください。
 ![run_workflow](./img/run_workflow.png)
 
-成功したら、各種リソースを確認してみてください。
+成功したら、ALBのDNSにHTTPでアクセスして、**Welcome to nginx!**が表示されることを確認してください。
+各種リソースも確認してみてください。

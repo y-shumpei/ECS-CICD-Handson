@@ -74,6 +74,30 @@ git clone https://github.com/[自分のGitHubアカウント名]/ECS-CICD-Handso
 cd ECS-CICD-Handson/
 ```
 
+### GitHubでPersonal access tokensの設定
+
+1. Githubの右上にある`自分のアイコン`を押して、`Settings`を選択します。
+![github_token_01](./img/github_token_01.png)
+
+2. 下にスクロールし、左ペインの`Developer settings`を押します。
+![github_token_02](./img/github_token_02.png)
+
+3. 左ペインの`Personal access tokens` -> `Tokens (classic)`の順で押します。
+![github_token_03](./img/github_token_03.png)
+
+4. 真ん中の`Generate new token` -> `Generate new token (classic)`の順で押します。
+![github_token_04](./img/github_token_04.png)
+
+5. 以下を設定して、`Generate token`を押します。
+- Noteに`GitHub Actions Handson`と記載
+- `repo`と`workflow`にチェック
+![github_token_05](./img/github_token_05.png)
+
+6. terminalで以下コマンドを実行します。  
+<アカウント名>と<アクセストークン>はそれぞれ書き換えて実行してください。
+```
+git remote set-url origin https://<アカウント名>:<アクセストークン>@github.com/<アカウント名>/ECS-CICD-Handson.git
+```
 ### 3. AWS Profileの設定
 
 terminalでAWS CLIを実行するAWS Profileの設定ができていない方は実施してください。
