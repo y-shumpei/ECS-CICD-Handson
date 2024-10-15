@@ -43,13 +43,13 @@ aws iam attach-role-policy --role-name github-action-role --policy-arn arn:aws:i
 
 ここで着目していただきたい記載が24行目と30行目になります。
 
-【24行目】
+【28行目】
 
 ```yaml
 - uses: ./.github/actions/container-build/
 ```
 
-【30行目】
+【34行目】
 
 ```yaml
 - uses: ./.github/actions/container-deploy/
@@ -58,9 +58,9 @@ aws iam attach-role-policy --role-name github-action-role --policy-arn arn:aws:i
 それぞれ、カレントディレクトリから今回扱う残りの2ファイルへのパスとなっています。  
 これらは残りの2ファイルで定義されたタスクを呼び出しています。
 
-24行目にて呼び出している`.github/workflows/container-build/action.yml`では、コンテナのビルドを行い、ECRにプッシュします。
+28行目にて呼び出している`.github/workflows/container-build/action.yml`では、コンテナのビルドを行い、ECRにプッシュします。
 
-30行目にて呼び出している`.github/workflows/contianer-deploy/action.yml`では、ECRのリポジトリからECSのタスク定義を更新し、ECSクラスターのサービスを更新しています。
+34行目にて呼び出している`.github/workflows/contianer-deploy/action.yml`では、ECRのリポジトリからECSのタスク定義を更新し、ECSクラスターのサービスを更新しています。
 
 ファイルの説明としては、以上となります。  
 ここからは実際に先ほどデプロイしたリソースから必要な変数を設定したり、ワークフローファイルを編集していただきます。
@@ -72,7 +72,7 @@ aws iam attach-role-policy --role-name github-action-role --policy-arn arn:aws:i
 
 例えば、下記のような記載があります。
 
-【26~27行目】
+【31~32行目】
 
 ```yaml
 with:
@@ -173,5 +173,5 @@ docker push <タグ>
 2. [OIDCの設定](../20_OIDCの設定/setting_OIDC.md)
 3. [リソースのデプロイ](../30_リソースのデプロイ/deploy_resource.md)
 4. [ECSへのコンテナデプロイ](../40_ECSへのコンテナデプロイ/deploy_container.md)
-5. [セキュリティの実装](../50_セキュリティの実装/security_scan.md)←次の手順です
+5. [**セキュリティの実装**](../50_セキュリティの実装/security_scan.md)←次の手順です
 6. [リソースの削除](../60_リソースの削除/delete_resource.md)

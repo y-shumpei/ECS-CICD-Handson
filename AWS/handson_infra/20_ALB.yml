@@ -70,8 +70,8 @@ Resources:
   # ロードバランサー
   ExampleALB:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
-    Name: 'handson-alb'
     Properties:
+      Name: 'handson-alb'
       Scheme: internet-facing
       SecurityGroups:
         - !Ref HandsonECSSecurityGroup
