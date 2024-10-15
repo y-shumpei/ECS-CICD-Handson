@@ -4,6 +4,20 @@
 
 ワークフロー `4 ハンズオン環境の削除`を実行してください。
 
+## GitHubActions用ロールの削除
+
+IAMポリシー `cfn-deploy-policy`および `deploy_ecs_task_policy`とIAMロール `github-actions-role`を削除します。
+
+権限を付与し、下記シェルスクリプトを実行してください。
+
+```bash
+chmod 744 ./AWS/aws-cli/delete_role.sh
+```
+
+```bash
+./AWS/aws-cli/delete_role.sh
+```
+
 ## 開発環境の削除
 
 ### Cloud9の削除
