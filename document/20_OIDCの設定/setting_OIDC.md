@@ -142,9 +142,108 @@ OIDCの設定は完了したので、実際にGitHub Actionsのワークフロ�
 
 ## GitHub Actionsについて
 
+`GitHub Actions` は、ビルド、テスト、デプロイのパイプラインを自動化できるCI/CD(継続的インテグレーションと継続的デリバリー) のプラットフォームです。  
+今回はリポジトリにプッシュされたタイミングや手動にてGitHub Actionsを動作させAWSのリソースを編集するといったことを行いますが、他にも例えばリポジトリでissueが作成された際に自動的にラベル付けをするといったことをさせることも可能です。
+
+### GitHub Actionsの要素
+
+GitHub Actionsの要素として下記のようなものがあります。
+
+- `ワークフロー`：GitHub Actionsにて実行されるプロセス
+- `イベント`：ワークフローのトリガー
+- `ジョブ`：ワークフロー内で実行される一連のステップ
+- `アクション`：タスクを1つのステップにまとめたもの
+- `ランナー`；ワークフローが実行される際にジョブ単位で動作するサーバ
+
+#### ワークフロー
+
+ワークフローとは、**1 つ以上のジョブを実行する**構成可能な自動化プロセスです。ワークフローは、リポジトリ内の `.github/workflows`ディレクトリにて定義されます。  
+先ほど実行した `1 OpenID Connectのテスト`が`.github/workflows/10_OIDC-test.yml`で定義されているワークフローです。  
+
+`.github/workflows/10_OIDC-test.yml`のようなファイルを**ワークフローファイル**と呼びます。  
+ワークフローファイルでは、後述のイベントやジョブなどが定義されています。
+
+#### イベント
+
+イベントとは、**ワークフローの実行をトリガーする**リポジトリ内の特定のアクティビティです。  
+ワークフローとは、1 つ以上のジョブを実行する構成可能な自動化プロセスです。
+
+ワークフローファイルでは、`on:`というキーで定義します。  
+`.github/workflows/10_OIDC-test.yml`では、下記のように定義されています。
+
+```yaml
+on: workflow_dispatch
+```
+
+`workflow_dispatch`では先ほどのように手動でトリガー(手動で開始)された際に実行されます。  
+他にも例えば `on: push`と指定することができ、これはリポジトリにプッシュされた際にワークフローが実行されます。  
+
+詳しくは[ワークフローをトリガーするイベント](https://docs.github.com/ja/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows)を参照してください。
+
+#### ジョブ
+
+ジョブとは、同じランナーで実行される**ワークフロー内の一連のステップ**です。各ステップは`jobs.<job_id>.steps`キーで定義されます。  
+`.github/workflows/10_OIDC-test.yml`ではjob_idを`connect`として下記の2つのステップがあります。
+
+```yaml
+- uses: aws-actions/configure-aws-credentials@v4 # AWSの認証アクション
+  with:
+    role-to-assume: ${{ env.ROLE_ARN }}
+    role-session-name: ${{ env.SESSION_NAME }}
+    aws-region: ap-northeast-1
+
+- run: aws iam list-policies --scope Local                        # 一時クレデンシャルの利用
+```
+
+1つ目の`uses`キーでは後述のアクションを実行しており、ここではAWSの公式のアクションを使用してAWSのクレデンシャルの設定を行っています。
+2つ目の`run`キーではOSのシェルを使用してCLIコマンドを実行しており、IAMのポリシー一覧を表示しています。  
+
+#### アクション
+
+アクションとは、複雑で頻繁に実行される**タスクを1つのステップにまとめたもの**でコードの量を削減するのに役立ちます。  
+アクションには独自で記載したものに加え、GitHub Marketplaceにて公開されたものを使用することもできます。
+
+先述したように`.github/workflows/10_OIDC-test.yml`では下記の記載にてアクションを呼び出しています。
+
+```yaml
+- uses: aws-actions/configure-aws-credentials@v4 # AWSの認証アクション
+  with:
+    role-to-assume: ${{ env.ROLE_ARN }}
+    role-session-name: ${{ env.SESSION_NAME }}
+    aws-region: ap-northeast-1
+```
+
+このアクションは[リポジトリ`aws-actions/configure-aws-credentials`](https://github.com/aws-actions/configure-aws-credentials/tree/main)にて定義されています。  
+今回は本リポジトリ内で定義したアクションも使用しますが、アクションを活用することにより簡単に複雑な自動化プロセスを作成することが可能となります。
+
+アクションの公開については[こちら](https://docs.github.com/ja/actions/sharing-automations/creating-actions/publishing-actions-in-github-marketplace)を確認してみてください。
+
+#### ランナー
+
+ランナーとは、**ワークフローがトリガーされると実行されるサーバ**です。ランナーは`jobs.<job_id>.runs-on`キーで定義されます。  
+`.github/workflows/10_OIDC-test.yml`では、下記のように定義されています。
+
+```yaml
+runs-on: ubuntu-latest
+```
+
+`ubuntu-latest`と指定しており`Ubuntu`内にてワークフローが実行されています。  
+
+ランナーには、`GitHub-Hosted Runners`もしくは`Self-Hosted Runners`を指定できます。  
+`GitHub-Hosted Runners`はGitHubが提供するマネージドな実行環境で`ubuntu-latest`もその一つです。  
+`Self-Hosted Runners`は利用者が用意した実行環境です。今回は使用しません。  
+
+GitHub-Hosted RunnersはLinuxの他にもMacやWindowsを指定することができます。  
+詳細は[こちら](https://docs.github.com/ja/actions/writing-workflows/workflow-syntax-for-github-actions#%E3%83%91%E3%83%96%E3%83%AA%E3%83%83%E3%82%AF-%E3%83%AA%E3%83%9D%E3%82%B8%E3%83%88%E3%83%AA%E3%81%AE%E6%A8%99%E6%BA%96%E3%81%AE-github-%E3%81%A7%E3%83%9B%E3%82%B9%E3%83%88%E3%81%95%E3%82%8C%E3%81%9F%E3%83%A9%E3%83%B3%E3%83%8A%E3%83%BC)を確認してみてください。
+
+以上でGitHub Actionsの説明について終わります。
+
+### 参考
+
 - [GitHub Actionsの概要](https://docs.github.com/ja/actions/about-github-actions/understanding-github-actions)
 - [ワークフローについて](https://docs.github.com/ja/actions/writing-workflows/about-workflows)
 - [ワークフロー構文](https://docs.github.com/ja/actions/writing-workflows/workflow-syntax-for-github-actions)
+  - [jobs.<job_id>.steps](https://docs.github.com/ja/actions/writing-workflows/workflow-syntax-for-github-actions#jobsjob_idsteps)
 
 ## 手順一覧
 
