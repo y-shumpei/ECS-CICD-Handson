@@ -37,4 +37,4 @@ https://ap-northeast-1.console.aws.amazon.com/vpcconsole/home?region=ap-northeas
 3. [リソースのデプロイ](../30_リソースのデプロイ/deploy_resource.md)
 4. [ECSへのコンテナデプロイ](../40_ECSへのコンテナデプロイ/deploy_container.md)
 5. [セキュリティの実装](../50_セキュリティの実装/security_scan.md)
-6. [リソースの削除](../60_リソースの削除/delete_resource.md)
+6. [**リソースの削除**](../60_リソースの削除/delete_resource.md)
