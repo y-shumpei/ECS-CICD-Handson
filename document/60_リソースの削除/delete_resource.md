@@ -6,7 +6,7 @@
 
 ## GitHubActions用ロールの削除
 
-IAMポリシー `cfn-deploy-policy`および `deploy_ecs_task_policy`とIAMロール `github-actions-role`を削除します。
+IAMポリシー `cfn-deploy-policy`および `deploy-ecs-task-policy`とIAMロール `github-actions-role`を削除します。
 
 権限を付与し、下記シェルスクリプトを実行してください。
 

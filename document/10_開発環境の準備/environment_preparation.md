@@ -7,10 +7,14 @@ VS Codeなどでローカルで開発できる環境がある方はそちらを�
 
 - GitHubアカウント
 - gitとAWS CLIが利用できるIDE（VS Code、CLoud9など）  
-以下コマンドで各バージョンが表示されるか確認してください
+以下コマンドで各バージョンが表示されるか確認してください  
+※バージョンの指定はありませんが、バージョンによってはエラーが発生してしまうことがあるかもしれません。
 ```
 git --version
+git version 2.40.1
+
 aws --version
+aws-cli/2.18.1
 ```
 - AWS Profile  
 以下コマンドで`Account`のidと`Arn`が利用するアカウントid、利用するIAMユーザーのarnになっていることを確認してください
@@ -19,7 +23,13 @@ aws sts get-caller-identity
 ```
 
 ## 環境構築
-### 1. Cloud9の作成
+
+### 1. GitHubアカウントの作成
+
+1. 以下リンクを参考にGitHubアカウントを作成してください。  
+https://docs.github.com/ja/get-started/start-your-journey/creating-an-account-on-github
+
+### 2. Cloud9の作成
 
 1. VPCを作成します。  
 https://ap-northeast-1.console.aws.amazon.com/vpcconsole/home?region=ap-northeast-1#vpcs:
@@ -42,11 +52,12 @@ https://ap-northeast-1.console.aws.amazon.com/cloud9control/home?region=ap-north
 `開く`を押して、Cloud9が開けることを確認します
 ![cloud9_03](./img/cloud9_03.png)
 
-4. フォルダ構成が表示されているところの`歯車マーク`を押して、`Show Hidden Files`を選択します。
+4. フォルダ構成が表示されているところの`歯車マーク`を押して、`Show Hidden Files`が選択されていることを確認してください。  
+選択されていない場合は選択してください。
 
 ![cloud9_04](./img/cloud9_04.png)
 
-### 2. リポジトリをforkして、開発環境にcloneする
+### 3. リポジトリをforkして、開発環境にcloneする
 
 1. 以下リポジトリにアクセスして、右上の`Fork`を押します。  
 https://github.com/CloudBuilders-Training/ECS-CICD-Handson
@@ -74,7 +85,7 @@ git clone https://github.com/[自分のGitHubアカウント名]/ECS-CICD-Handso
 cd ECS-CICD-Handson/
 ```
 
-### GitHubでPersonal access tokensの設定
+### 4. GitHubでPersonal access tokensの設定
 
 1. Githubの右上にある`自分のアイコン`を押して、`Settings`を選択します。
 ![github_token_01](./img/github_token_01.png)
@@ -98,7 +109,7 @@ cd ECS-CICD-Handson/
 ```
 git remote set-url origin https://<アカウント名>:<アクセストークン>@github.com/<アカウント名>/ECS-CICD-Handson.git
 ```
-### 3. AWS Profileの設定
+### 5. AWS Profileの設定
 
 terminalでAWS CLIを実行するAWS Profileの設定ができていない方は実施してください。
 

@@ -78,7 +78,7 @@ Dockerfileパス: `docker/ecs/Dockerfile`
 
 2. コンテナが入れ替わっていることを確認するために、Dockerfileの中身を修正します。  
 Dockerfileパス: `docker/ecs/Dockerfile`  
-変更内容: `Hello Amazon ECS` -> `Dockle Success`
+変更内容: `Trivy Success` -> `Dockle Success`
 
 3. ワークフローが成功したら、以前の手順同様にコンテナの入れ替えを実施し、`Dockle Success`が表示されることを確認します。  
 

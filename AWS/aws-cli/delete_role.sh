@@ -21,7 +21,7 @@ aws iam delete-policy --policy-arn $(
 # ポリシー deploy_ecs_task_policy の削除
 aws iam delete-policy --policy-arn $(
   aws iam list-policies \
-    --query "Policies[?PolicyName=='deploy_ecs_task_policy'].{ARN:Arn}" \
+    --query "Policies[?PolicyName=='deploy-ecs-task-policy'].{ARN:Arn}" \
     --output text
 )
 

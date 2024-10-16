@@ -10,7 +10,7 @@
 このファイルを使用してポリシーを作成します。
 
 ```bash
-aws iam create-policy --policy-name deploy-ecs_task_policy --policy-document file://AWS/iam_policy/deploy_ecs_task_policy.json
+aws iam create-policy --policy-name deploy-ecs-task-policy --policy-document file://AWS/iam_policy/deploy_ecs_task_policy.json
 ```
 
 ## IAMロールへアタッチ
@@ -18,7 +18,7 @@ aws iam create-policy --policy-name deploy-ecs_task_policy --policy-document fil
 続いて上記で作成したポリシーを`github-actions-role`にアタッチします。
 
 ```bash
-aws iam attach-role-policy --role-name github-action-role --policy-arn arn:aws:iam::${AWS_ID}:policy/deploy_ecs_task_policy
+aws iam attach-role-policy --role-name github-actions-role --policy-arn arn:aws:iam::${AWS_ID}:policy/deploy-ecs-task-policy
 ```
 
 ## ワークフローファイルの作成
@@ -137,7 +137,8 @@ docker push <タグ>
 
 <details><summary>ヒント3</summary>
 
-`.github/workflows/30_ecs-task-deploy.yml`の`container-image`のように、以前の処理で出力した内容を利用することができます。
+`.github/workflows/30_ecs-task-deploy.yml`の`container-image`のように、以前の処理で出力した内容を利用することができます。  
+`タスク定義の修正`のステップで出力した`task-definition`を利用するようにしてください。
 
 </details>
 

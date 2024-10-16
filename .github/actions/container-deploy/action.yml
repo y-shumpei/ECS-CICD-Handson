@@ -63,8 +63,8 @@ runs:
     - name: ECSサービスの更新
       uses: aws-actions/amazon-ecs-deploy-task-definition@v1
       with:
-        ecs-cluster: ###### ECSクラスター ######
-        ecs-service: ###### ECSサービス ######
+        cluster: ###### ECSクラスター ######
+        service: ###### ECSサービス ######
         task-definition: ###### タスク定義 ※こちらは「タスク定義の修正」時に出力されたタスク定義を記述します。ヒント3参照 ######
         codedeploy-appspec: AWS/ecs/appspec.yml
         codedeploy-application: ###### CodeDeployアプリケーション ######

@@ -243,7 +243,7 @@ GitHub-Hosted RunnersはLinuxの他にもMacやWindowsを指定することが�
 - [GitHub Actionsの概要](https://docs.github.com/ja/actions/about-github-actions/understanding-github-actions)
 - [ワークフローについて](https://docs.github.com/ja/actions/writing-workflows/about-workflows)
 - [ワークフロー構文](https://docs.github.com/ja/actions/writing-workflows/workflow-syntax-for-github-actions)
-  - [jobs.<job_id>.steps](https://docs.github.com/ja/actions/writing-workflows/workflow-syntax-for-github-actions#jobsjob_idsteps)
+- [jobs.<job_id>.steps](https://docs.github.com/ja/actions/writing-workflows/workflow-syntax-for-github-actions#jobsjob_idsteps)
 
 ## 手順一覧
 
