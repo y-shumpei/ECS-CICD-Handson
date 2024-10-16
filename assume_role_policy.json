@@ -1,0 +1,17 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Principal": {
+        "Federated": "arn:aws:iam::905418350123:oidc-provider/token.actions.githubusercontent.com"
+      },
+      "Condition": {
+        "StringLike": {
+          "token.actions.githubusercontent.com:sub": "repo:y-shumpei/ECS-CICD-Handson:*"
+        }
+      }
+    }
+  ]
+}
