@@ -65,7 +65,7 @@ runs:
       with:
         cluster: handson-ecs-cluster
         service: handson-ecs-service
-        task-definition: ${{ vars.TASK_DEFINITION_NAME }}
+        task-definition: ${{ inputs.task-definition }}
         codedeploy-appspec: AWS/ecs/appspec.yml
         codedeploy-application: ###### CodeDeployアプリケーション ######
         codedeploy-deployment-group: ###### CodeDeployデプロイグループ ######
